@@ -22,7 +22,7 @@ app.get('/todos/:id', function(req, res){
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
 	if(typeof matchedTodo === 'undefined'){
-		res.status(404).send();
+		res.status(404).send({"error": "no todo found with that id"});
 	}
 	else{
 		res.json(matchedTodo)	
@@ -35,7 +35,7 @@ app.post('/todos', function(req, res){
 	var body = _.pick(req.body, 'description', 'completed');	
 	body.description = body.description.trim();
 	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.length === 0){
-		return res.status(400).send();
+		return res.status(400).send({"error": "invalid todo POST request"});
 	}
 	var todo = body;
 	todo.id = todoNextId;
@@ -44,6 +44,18 @@ app.post('/todos', function(req, res){
 	res.json(todo);
 });
 
+// DELETE
+app.delete('/todos/:id', function(req, res){
+	var todoId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: todoId});
+	if(typeof matchedTodo === 'undefined'){
+		res.status(404).send({ "error": "no todo found with that id" });
+	}
+	else{
+		todos = _.without(todos, matchedTodo);
+		res.json(matchedTodo);	
+	}	
+});
 
 app.listen(PORT, function(){
 	console.log('Express listening on port ' + PORT + '!');
